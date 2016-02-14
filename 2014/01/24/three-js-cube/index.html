@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Three.js实现旋转Cube | 本本发热</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="产品需要一个旋转Cube的广告展示，做调研。找到了一个实现3d效果的Js库，three.js，戳这里：http://threejs.org/。直接找到一个旋转Cube的demo进行了修改，很简单的需求：每个面贴不同的图片，并且每个面支持点击事件。使用的Demo地址：http://threejs.org/examples/#canvas_geometry_cube。这是每个面用纯色填充的cube，实">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Three.js实现旋转Cube">
+<meta property="og:url" content="http://yoursite.com/2014/01/24/three-js-cube/">
+<meta property="og:site_name" content="本本发热">
+<meta property="og:description" content="产品需要一个旋转Cube的广告展示，做调研。找到了一个实现3d效果的Js库，three.js，戳这里：http://threejs.org/。直接找到一个旋转Cube的demo进行了修改，很简单的需求：每个面贴不同的图片，并且每个面支持点击事件。使用的Demo地址：http://threejs.org/examples/#canvas_geometry_cube。这是每个面用纯色填充的cube，实">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Three.js实现旋转Cube">
+<meta name="twitter:description" content="产品需要一个旋转Cube的广告展示，做调研。找到了一个实现3d效果的Js库，three.js，戳这里：http://threejs.org/。直接找到一个旋转Cube的demo进行了修改，很简单的需求：每个面贴不同的图片，并且每个面支持点击事件。使用的Demo地址：http://threejs.org/examples/#canvas_geometry_cube。这是每个面用纯色填充的cube，实">
+
+  
+    <link rel="alternative" href="/atom.xml" title="本本发热" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/img/favicon.ico" type="image/x-ico">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+
+  <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<div class="profilepic">
+			<img src="https://avatars2.githubusercontent.com/u/2568990?v=2&amp;s=150">
+		</div>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Frank Su</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">博观而约取，厚积而薄发</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						
+						<li>关于我</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+							<li><a href="/instagram">Instagram</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/collaroid" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/collaroid" title="weibo">weibo</a>
+					        
+								<a class="facebook" target="_blank" href="https://www.facebook.com/liangbo.su" title="facebook">facebook</a>
+					        
+								<a class="google" target="_blank" href="https://plus.google.com/+LiangboSu" title="google">google</a>
+					        
+								<a class="twitter" target="_blank" href="https://twitter.com/Collaroid" title="twitter">twitter</a>
+					        
+								<a class="linkedin" target="_blank" href="https://www.linkedin.com/profile/view?id=111605780" title="linkedin">linkedin</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud">
+						<a href="/tags/Ads/" style="font-size: 10.00px;">Ads</a><a href="/tags/Android/" style="font-size: 10.00px;">Android</a><a href="/tags/CookieMapping/" style="font-size: 10.00px;">CookieMapping</a><a href="/tags/Exchange/" style="font-size: 10.00px;">Exchange</a><a href="/tags/Galaxy/" style="font-size: 10.00px;">Galaxy</a><a href="/tags/HTML/" style="font-size: 10.00px;">HTML</a><a href="/tags/HTML5/" style="font-size: 15.00px;">HTML5</a><a href="/tags/IDE/" style="font-size: 10.00px;">IDE</a><a href="/tags/Java/" style="font-size: 17.50px;">Java</a><a href="/tags/JavaScript/" style="font-size: 15.00px;">JavaScript</a><a href="/tags/MRAID/" style="font-size: 10.00px;">MRAID</a><a href="/tags/WebGL/" style="font-size: 10.00px;">WebGL</a><a href="/tags/Zookeeper/" style="font-size: 10.00px;">Zookeeper</a><a href="/tags/工作/" style="font-size: 20.00px;">工作</a><a href="/tags/杂谈/" style="font-size: 10.00px;">杂谈</a><a href="/tags/演唱会/" style="font-size: 10.00px;">演唱会</a><a href="/tags/生活/" style="font-size: 10.00px;">生活</a><a href="/tags/算法/" style="font-size: 12.50px;">算法</a>
+					</div>
+				</section>
+				
+				
+				
+
+				
+				
+				<section class="switch-part switch-part3">
+				
+					A Coder Who is Still On The Way, 2013年毕业的小猿，一切才刚刚开始。
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay"></div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img src="https://avatars2.githubusercontent.com/u/2568990?v=2&amp;s=150">
+			</div>
+
+			<hgroup>
+			  <h1 class="header-author"><a href="/">Frank Su</a></h1>
+			</hgroup>
+			
+			<p class="header-subtitle">博观而约取，厚积而薄发</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/instagram">Instagram</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/collaroid" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/collaroid" title="weibo">weibo</a>
+			        
+						<a class="facebook" target="_blank" href="https://www.facebook.com/liangbo.su" title="facebook">facebook</a>
+			        
+						<a class="google" target="_blank" href="https://plus.google.com/+LiangboSu" title="google">google</a>
+			        
+						<a class="twitter" target="_blank" href="https://twitter.com/Collaroid" title="twitter">twitter</a>
+			        
+						<a class="linkedin" target="_blank" href="https://www.linkedin.com/profile/view?id=111605780" title="linkedin">linkedin</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <article id="post-three-js-cube" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2014/01/24/three-js-cube/" class="article-date">
+  	<time datetime="2014-01-24T04:13:37.000Z" itemprop="datePublished">2014.01.24</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/工作日志/">工作日志</a>
+  </div>
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/HTML5/">HTML5</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaScript/">JavaScript</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/WebGL/">WebGL</a></li></ul>
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Three.js实现旋转Cube
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>产品需要一个旋转Cube的广告展示，做调研。找到了一个实现3d效果的Js库，three.js，戳这里：<a href="http://threejs.org/" target="_blank" rel="external">http://threejs.org/</a>。<br>直接找到一个旋转Cube的demo进行了修改，很简单的需求：每个面贴不同的图片，并且每个面支持点击事件。使用的Demo地址：<a href="http://threejs.org/examples/#canvas_geometry_cube" target="_blank" rel="external">http://threejs.org/examples/#canvas_geometry_cube</a>。这是每个面用纯色填充的cube，实现了旋转，但不支持点击，顺便说一下，该网站提供的交流平台虽然很简陋，但是有许多热心的同志在上面，提问后会很快得到答复，也说明three.js使用的人还是很多的。<a id="more"></a>下面说说每个面贴图和点击效果的代码:</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">var</span> scene = <span class="keyword">new</span> THREE.Scene(); <span class="comment">// 建立一个场景</span></div><div class="line"><span class="keyword">var</span> geometry = <span class="keyword">new</span> THREE.CubeGeometry( <span class="number">200</span>, <span class="number">200</span>, <span class="number">200</span>); <span class="comment">// 立方体对象，参数为长宽高</span></div><div class="line"></div><div class="line"><span class="keyword">var</span> material = [];</div><div class="line"><span class="keyword">for</span> (<span class="keyword">var</span> i = <span class="number">0</span>; i &lt; <span class="number">6</span>; i++) {</div><div class="line">    <span class="comment">// 用循环给每个面添加一张本地图片</span></div><div class="line">    material.push(<span class="keyword">new</span> THREE.MeshBasicMaterial({map:THREE.ImageUtils.loadTexture(<span class="string">"./"</span>+(i+<span class="number">1</span>)+<span class="string">".jpg"</span>), overdraw: <span class="literal">true</span>}));</div><div class="line">};</div><div class="line"></div><div class="line">cube = <span class="keyword">new</span> THREE.Mesh(geometry, <span class="keyword">new</span> THREE.MeshFaceMaterial(material)); <span class="comment">// mesh对象，把图片加到立方体上</span></div><div class="line">scene.add(cube); <span class="comment">// 场景中添加该对象</span></div></pre></td></tr></table></figure>
+
+<p>下面是实现点击的代码，在点击回调方法中：</p>
+<figure class="highlight javasscript"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">document</span>.addEventListener( <span class="string">'mousedown'</span>, onDocumentMouseDown, <span class="literal">false</span> ); <span class="comment">// 添加mousedown事件及回调</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">function</span> <span class="title">onDocumentMouseDown</span><span class="params">( event )</span> </span>{</div><div class="line">    event.preventDefault();</div><div class="line">    <span class="keyword">var</span> vector = <span class="keyword">new</span> THREE.Vector3( ( event.clientX / <span class="built_in">window</span>.innerWidth ) * <span class="number">2</span> - <span class="number">1</span>, - ( event.clientY / <span class="built_in">window</span>.innerHeight ) * <span class="number">2</span> + <span class="number">1</span>, <span class="number">0.5</span> );</div><div class="line">    projector.unprojectVector( vector, camera );</div><div class="line">    <span class="keyword">var</span> raycaster = <span class="keyword">new</span> THREE.Raycaster( camera.position, vector.sub( camera.position ).normalize() );</div><div class="line">    <span class="keyword">var</span> intersects = raycaster.intersectObjects( objects );</div><div class="line"></div><div class="line">    <span class="keyword">if</span> ( intersects.length &gt; <span class="number">0</span> ) {</div><div class="line">        <span class="keyword">for</span> ( <span class="keyword">var</span> i <span class="keyword">in</span> intersects ) {</div><div class="line">            <span class="comment">// 这里处理点击相应面要做的事情</span></div><div class="line">            <span class="built_in">console</span>.log(<span class="built_in">JSON</span>.stringify(intersects[ i ].face.materialIndex));</div><div class="line">        }</div><div class="line">    }</div><div class="line">    <span class="comment">//...实现旋转相关功能</span></div><div class="line">}</div></pre></td></tr></table></figure>
+
+<p>three.js的文档相对较少，API文档也不完整，所以许多功能只能自己照着demo修改测试了。</p>
+<p>最后说说两个渲染的方法，three.js提供了两种成熟的render，webGLRender和canvasRender，其中，webGLRender用到了webGL，这就使得许多不支持WebGL的移动设备不能使用这个渲染器，另外的canvas就适用范围就很广了，但是用canvas在我这个例子中就会出现贴图在旋转过程中错位变形的问题，在chat中询问过，这个确实是一个问题，stackoverflow上给出的方案是换用webGL。。。</p>
+<p><a href="/assets/cube/cube.html">Demo点这里~</a></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/03/24/cookie-mapping/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          Cookie Mapping
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2013/11/11/mraid-html5/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">MRAID规范以及HTML5摇动实现</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到：</span>
+		<a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+		<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="three-js-cube" data-title="Three.js实现旋转Cube" data-url="http://yoursite.com/2014/01/24/three-js-cube/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 Frank Su
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+  <script src="/js/main.js" type="text/javascript"></script>
+
+
+  </div>
+</body>
+</html>

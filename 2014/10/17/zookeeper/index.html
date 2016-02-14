@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Zookeeper实现共享锁 | 本本发热</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="一个项目模块分布式的部署了多台服务器，许多定时任务只需要一台服务器执行即可。Too low too simple的方法是之前在DB中保存了需要执行任务的特定机器名，用来判断哪台服务器执行任务(其他解决方式？)。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Zookeeper实现共享锁">
+<meta property="og:url" content="http://yoursite.com/2014/10/17/zookeeper/">
+<meta property="og:site_name" content="本本发热">
+<meta property="og:description" content="一个项目模块分布式的部署了多台服务器，许多定时任务只需要一台服务器执行即可。Too low too simple的方法是之前在DB中保存了需要执行任务的特定机器名，用来判断哪台服务器执行任务(其他解决方式？)。">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Zookeeper实现共享锁">
+<meta name="twitter:description" content="一个项目模块分布式的部署了多台服务器，许多定时任务只需要一台服务器执行即可。Too low too simple的方法是之前在DB中保存了需要执行任务的特定机器名，用来判断哪台服务器执行任务(其他解决方式？)。">
+
+  
+    <link rel="alternative" href="/atom.xml" title="本本发热" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/img/favicon.ico" type="image/x-ico">
+  
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+
+  <script src="http://libs.baidu.com/jquery/1.9.0/jquery.js"></script>
+</head>
+<body>
+  <div id="container">
+    <div class="left-col">
+    <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<div class="profilepic">
+			<img src="https://avatars2.githubusercontent.com/u/2568990?v=2&amp;s=150">
+		</div>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Frank Su</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">博观而约取，厚积而薄发</p>
+		
+
+		
+			<div class="switch-btn">
+				<div class="icon">
+					<div class="icon-ctn">
+						<div class="icon-wrap icon-house" data-idx="0">
+							<div class="birdhouse"></div>
+							<div class="birdhouse_holes"></div>
+						</div>
+						<div class="icon-wrap icon-ribbon hide" data-idx="1">
+							<div class="ribbon"></div>
+						</div>
+						
+						
+						<div class="icon-wrap icon-me hide" data-idx="3">
+							<div class="user"></div>
+							<div class="shoulder"></div>
+						</div>
+						
+					</div>
+					
+				</div>
+				<div class="tips-box hide">
+					<div class="tips-arrow"></div>
+					<ul class="tips-inner">
+						<li>菜单</li>
+						<li>标签</li>
+						
+						
+						<li>关于我</li>
+						
+					</ul>
+				</div>
+			</div>
+		
+
+		<div class="switch-area">
+			<div class="switch-wrap">
+				<section class="switch-part switch-part1">
+					<nav class="header-menu">
+						<ul>
+						
+							<li><a href="/">主页</a></li>
+				        
+							<li><a href="/archives">所有文章</a></li>
+				        
+							<li><a href="/instagram">Instagram</a></li>
+				        
+						</ul>
+					</nav>
+					<nav class="header-nav">
+						<div class="social">
+							
+								<a class="github" target="_blank" href="https://github.com/collaroid" title="github">github</a>
+					        
+								<a class="weibo" target="_blank" href="http://weibo.com/collaroid" title="weibo">weibo</a>
+					        
+								<a class="facebook" target="_blank" href="https://www.facebook.com/liangbo.su" title="facebook">facebook</a>
+					        
+								<a class="google" target="_blank" href="https://plus.google.com/+LiangboSu" title="google">google</a>
+					        
+								<a class="twitter" target="_blank" href="https://twitter.com/Collaroid" title="twitter">twitter</a>
+					        
+								<a class="linkedin" target="_blank" href="https://www.linkedin.com/profile/view?id=111605780" title="linkedin">linkedin</a>
+					        
+						</div>
+					</nav>
+				</section>
+				
+				
+				<section class="switch-part switch-part2">
+					<div class="widget tagcloud">
+						<a href="/tags/Ads/" style="font-size: 10.00px;">Ads</a><a href="/tags/Android/" style="font-size: 10.00px;">Android</a><a href="/tags/CookieMapping/" style="font-size: 10.00px;">CookieMapping</a><a href="/tags/Exchange/" style="font-size: 10.00px;">Exchange</a><a href="/tags/Galaxy/" style="font-size: 10.00px;">Galaxy</a><a href="/tags/HTML/" style="font-size: 10.00px;">HTML</a><a href="/tags/HTML5/" style="font-size: 15.00px;">HTML5</a><a href="/tags/IDE/" style="font-size: 10.00px;">IDE</a><a href="/tags/Java/" style="font-size: 17.50px;">Java</a><a href="/tags/JavaScript/" style="font-size: 15.00px;">JavaScript</a><a href="/tags/MRAID/" style="font-size: 10.00px;">MRAID</a><a href="/tags/WebGL/" style="font-size: 10.00px;">WebGL</a><a href="/tags/Zookeeper/" style="font-size: 10.00px;">Zookeeper</a><a href="/tags/工作/" style="font-size: 20.00px;">工作</a><a href="/tags/杂谈/" style="font-size: 10.00px;">杂谈</a><a href="/tags/演唱会/" style="font-size: 10.00px;">演唱会</a><a href="/tags/生活/" style="font-size: 10.00px;">生活</a><a href="/tags/算法/" style="font-size: 12.50px;">算法</a>
+					</div>
+				</section>
+				
+				
+				
+
+				
+				
+				<section class="switch-part switch-part3">
+				
+					A Coder Who is Still On The Way, 2013年毕业的小猿，一切才刚刚开始。
+				</section>
+				
+			</div>
+		</div>
+	</header>				
+</div>
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay"></div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				<img src="https://avatars2.githubusercontent.com/u/2568990?v=2&amp;s=150">
+			</div>
+
+			<hgroup>
+			  <h1 class="header-author"><a href="/">Frank Su</a></h1>
+			</hgroup>
+			
+			<p class="header-subtitle">博观而约取，厚积而薄发</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/instagram">Instagram</a></li>
+		        
+		        <div class="clearfix"></div>
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/collaroid" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="http://weibo.com/collaroid" title="weibo">weibo</a>
+			        
+						<a class="facebook" target="_blank" href="https://www.facebook.com/liangbo.su" title="facebook">facebook</a>
+			        
+						<a class="google" target="_blank" href="https://plus.google.com/+LiangboSu" title="google">google</a>
+			        
+						<a class="twitter" target="_blank" href="https://twitter.com/Collaroid" title="twitter">twitter</a>
+			        
+						<a class="linkedin" target="_blank" href="https://www.linkedin.com/profile/view?id=111605780" title="linkedin">linkedin</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+      <article id="post-zookeeper" class="article article-type-post" itemscope itemprop="blogPost">
+  
+    <div class="article-meta">
+      <a href="/2014/10/17/zookeeper/" class="article-date">
+  	<time datetime="2014-10-16T16:44:35.000Z" itemprop="datePublished">2014.10.17</time>
+</a>
+      
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/工作日志/">工作日志</a>
+  </div>
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Java/">Java</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Zookeeper/">Zookeeper</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/工作/">工作</a></li></ul>
+
+    </div>
+  
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Zookeeper实现共享锁
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>一个项目模块分布式的部署了多台服务器，许多定时任务只需要一台服务器执行即可。Too low too simple的方法是之前在DB中保存了需要执行任务的特定机器名，用来判断哪台服务器执行任务(其他解决方式？)。<a id="more"></a></p>
+<p>在一个阳光明媚的早上，惨案发生了。运维更换了服务器，导致DB中机器下线，定时任务都歇菜了。如此，Zookeeper有了用武之地，下面就说说用zookeeper共享锁来实现控制多台服务器之间的互斥操作。</p>
+<p>有必要先大概说说ZK的数据模型，其所有功能和服务均是基于该数据模型来实现。这里直接引用其他地方的介绍，如果不清楚可以多搜索点相关信息查看：</p>
+<p>ZK其数据模型有些像操作系统的文件结构，结构如下图所示：</p>
+<p>(1)每个节点在zookeeper中叫做znode,并且其有一个唯一的路径标识，如/SERVER2节点的标识就为/APP3/SERVER2<br>(2)znode可以有子znode，并且znode里可以存数据，但是EPHEMERAL类型的节点不能有子节点<br>(3)znode中的数据可以有多个版本，比如某一个路径下存有多个数据版本，那么查询这个路径下的数据就需要带上版本<br>(4)znode可以是临时节点，一旦创建这个znode的客户端与服务器失去联系，这个znode也将自动删除，Zookeeper的客户端和服务器通信采用长连接方式，每个客户端和  服务器通过心跳来保持连接，这个连接状态称为session，如果znode是临时节点，这个session失效，znode也就删除了<br>(5)znode的目录名可以自动编号，如App1已经存在，再创建的话，将会自动命名为App2<br>(6)znode可以被监控，包括这个目录节点中存储的数据的修改，子节点目录的变化等，一旦变化可以通知设置监控的客户端，这个功能是zookeeper对于应用最重要的特性，通过这个特性可以实现的功能包括配置的集中管理，集群管理，分布式锁等等。</p>
+<p>Apache有一套基础的ZK包，提供ZK的API来使用。我们使用了Curator，这是一套开源的Zookeeper客户端框架，他对基础的ZK API进行了封装，提供了一套更完善和方便的开发框架。主要解决以下几个问题（依旧引用）：<br>1.封装ZooKeeper client与ZooKeeper server之间的连接处理;<br>2.提供了一套ZK操作API;<br>3.提供ZooKeeper各种应用场景(recipe, 比如共享锁服务, 集群领导选举机制)的抽象封装.</p>
+<p>我们用到的就是第三点，Curator提供的共享锁类和信号量类。共享锁已经提供了多个分布式服务器同时竞争资源时的共享锁服务，但是，我们项目的需求是，在一台服务器竞争到锁并执行任务后，其他服务器在一定的周期类就算再次获得该锁也不再执行任务。所以，我又引入了信号量类，用来标记锁是否已经被获得过。思路如下：首先，实现共享锁，服务器竞争获取共享锁，当一台服务器获得后，其他服务器仍然保持请求等待锁的状态（确保任务一定执行），然后，获得锁的服务器在执行完成后对该锁下的信号量进行修改，标记已经执行任务，然后释放锁。最后，其他等待中的服务器依次获得释放的锁，检查信号量，发现已近执行，释放锁并退出。</p>
+<p>锁的初始化：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 静态块保证创建连接执行一次并一直保持</span></div><div class="line"> 	<span class="keyword">static</span> {</div><div class="line">        RetryPolicy retryPolicy = <span class="keyword">new</span> ExponentialBackoffRetry(<span class="number">1000</span>, <span class="number">3</span>);</div><div class="line">        <span class="comment">// 创建一个与服务器的连接</span></div><div class="line">        client = CuratorFrameworkFactory.newClient(connectionString, retryPolicy);</div><div class="line">        client.start();</div><div class="line">    }</div><div class="line"></div><div class="line">    <span class="javadoc">/**</span></div><div class="line">     * 创建分布式锁,当天此锁只能使用一次</div><div class="line">     *<span class="javadoctag"> @param</span> lockname 竞争资源标志,lockName中不能包含单词lock</div><div class="line">     *<span class="javadoctag"> @param</span>  锁周期， 该周期内锁只能用一次, LOCK_PERIOD_HOUR, LOCK_PERIOD_DATE</div><div class="line">     */</div><div class="line">    <span class="keyword">public</span> <span class="title">SharedCountSemaphore</span>(String lockname, <span class="keyword">int</span> lockperoid) {</div><div class="line">        <span class="comment">// 根据锁周期来确定本周期及上周期的path</span></div><div class="line">        Calendar calendar = <span class="keyword">new</span> GregorianCalendar();</div><div class="line">        calendar.setTime(<span class="keyword">new</span> Date());</div><div class="line">        String newStr = <span class="string">""</span>;</div><div class="line">        String oldStr = <span class="string">""</span>;</div><div class="line">        <span class="keyword">switch</span> (lockperoid) {</div><div class="line">            <span class="keyword">case</span> LOCK_PERIOD_HOUR:</div><div class="line">                calendar.add(Calendar.HOUR, -<span class="number">1</span>);</div><div class="line">                newStr = <span class="keyword">new</span> SimpleDateFormat(<span class="string">"yyyyMMddHH"</span>).format(<span class="keyword">new</span> Date());</div><div class="line">                oldStr = <span class="keyword">new</span> SimpleDateFormat(<span class="string">"yyyyMMddHH"</span>).format(calendar.getTime());</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            <span class="keyword">case</span> LOCK_PERIOD_DATE:</div><div class="line">                calendar.add(Calendar.DATE, -<span class="number">1</span>);</div><div class="line">                newStr = <span class="keyword">new</span> SimpleDateFormat(<span class="string">"yyyyMMdd"</span>).format(<span class="keyword">new</span> Date());</div><div class="line">                oldStr = <span class="keyword">new</span> SimpleDateFormat(<span class="string">"yyyyMMdd"</span>).format(calendar.getTime());</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            <span class="keyword">default</span>:</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">        }</div><div class="line">        <span class="comment">//本周期path</span></div><div class="line">        <span class="keyword">this</span>.lockName = lockname + <span class="string">"_"</span> + newStr;</div><div class="line">        <span class="keyword">this</span>.path = root + <span class="string">"/"</span> + <span class="keyword">this</span>.lockName;</div><div class="line">        <span class="keyword">try</span> {</div><div class="line">            <span class="comment">// 删除上周期路径</span></div><div class="line">            client.delete().inBackground().forPath(root + <span class="string">"/"</span> + lockname + <span class="string">"_"</span> + oldStr);</div><div class="line">            <span class="comment">// 创建共享锁，目录</span></div><div class="line">            lock = <span class="keyword">new</span> InterProcessMutex(client, <span class="keyword">this</span>.path);</div><div class="line">            <span class="comment">// 初始化信号量</span></div><div class="line">            sharedCount = <span class="keyword">new</span> SharedCount(client, <span class="keyword">this</span>.path, <span class="number">0</span>);</div><div class="line">            sharedCount.start();</div><div class="line">            isCanUsed = <span class="keyword">true</span>;</div><div class="line">        } <span class="keyword">catch</span> (Exception e) {</div><div class="line">            isCanUsed = <span class="keyword">false</span>;</div><div class="line">            logger.error(e.getMessage(), e);</div><div class="line">        }</div><div class="line">    }</div></pre></td></tr></table></figure>
+
+<p>这里，我是用了“任务名+时间周期”作为zk路径名称，这样可以保证一个周期中的各服务器创建的锁有相同的目录，同时区别上周期的锁（在每次新周期的锁生成后，会删除上周期的目录）。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">trylock</span>() {</div><div class="line">      <span class="keyword">boolean</span> isLock = <span class="keyword">false</span>;</div><div class="line">      <span class="keyword">try</span> {</div><div class="line">          <span class="comment">// 1秒内会尝试获取锁</span></div><div class="line">          <span class="keyword">while</span> (<span class="keyword">true</span>) {</div><div class="line">              <span class="keyword">if</span> (lock.acquire(<span class="number">1</span>, TimeUnit.SECONDS)) {</div><div class="line">                  <span class="keyword">if</span> (sharedCount == <span class="keyword">null</span>) {</div><div class="line">                      <span class="comment">// 非限定次数的初始化方法没有shareCount对象，该情况下每次获得锁后均执行</span></div><div class="line">                      isLock = <span class="keyword">true</span>;</div><div class="line">                      <span class="keyword">break</span>;</div><div class="line">                  }</div><div class="line">                  <span class="keyword">if</span> (sharedCount.getCount() == <span class="number">0</span>) {</div><div class="line">                      sharedCount.setCount(<span class="number">1</span>);</div><div class="line">                      isLock = <span class="keyword">true</span>;</div><div class="line">                  } <span class="keyword">else</span> {</div><div class="line">                      isLock = <span class="keyword">false</span>;</div><div class="line">                      unlock(); <span class="comment">// 释放锁</span></div><div class="line">                  }</div><div class="line">                  <span class="keyword">break</span>;</div><div class="line">              }</div><div class="line">          }</div><div class="line">      } <span class="keyword">catch</span> (InterruptedException e) {</div><div class="line">          isLock = <span class="keyword">false</span>;</div><div class="line">          logger.error(e.getMessage(), e);</div><div class="line">      } <span class="keyword">catch</span> (Exception e) {</div><div class="line">          isLock = <span class="keyword">false</span>;</div><div class="line">          logger.error(e.getMessage(), e);</div><div class="line">      }</div><div class="line">      <span class="keyword">return</span> isLock;</div><div class="line">  }</div></pre></td></tr></table></figure>
+
+<p>在trylock方法中使用死循环，保证每台机器均能够获得锁一次，这样避免了网络异常情况下，锁获取失败后，任务不执行的情况。同时，机器在获取到锁之后均会检查信号量是否置位，已经置为1则说明任务已经执行，不需要重复执行，反之，则执行任务并对信号量置位。</p>
+<p>总结：</p>
+<ol>
+<li>Zookeeper相关的服务实现均基于其目录结构，对目录结构有清楚的理解是使用ZK的基础。</li>
+<li>应该了解一下机器间的同步或加锁机制其他的实现方式，与ZK做比较。</li>
+</ol>
+
+      
+    </div>
+    <footer class="article-footer">
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2014/12/14/bye-eclipse/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">&lt;</strong>
+      <div class="article-nav-title">
+        
+          Bye Eclipse
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2014/10/15/migrate-from-wordpress/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Migrate From WordPress</div>
+      <strong class="article-nav-caption">&gt;</strong>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+<div class="share">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">分享到：</span>
+		<a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+		<a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="http://v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="zookeeper" data-title="Zookeeper实现共享锁" data-url="http://yoursite.com/2014/10/17/zookeeper/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 Frank Su
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css" type="text/css">
+
+  <script src="/fancybox/jquery.fancybox.pack.js" type="text/javascript"></script>
+
+  <script src="/js/main.js" type="text/javascript"></script>
+
+
+  </div>
+</body>
+</html>
